@@ -1,1 +1,1 @@
-## End to End Machine Learning Project for Electricity Consumption Forecasting
+## End to End Project for Electricity Consumption Forecasting
