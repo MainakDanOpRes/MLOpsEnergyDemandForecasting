@@ -153,6 +153,57 @@ class ModelTrainer:
 
     def initiate_model_trainer(self, train_path, test_path):
         try:
-            pass
+            logging.info('loading transformed data into class state.')
+
+            self.train_df = pd.read_csv(train_path, index_col = 'Datetime', parse_dates=True)
+            self.test_df = pd.read_csv(test_path, index_col = 'Datetime', parse_dates=True)
+            
+            models = {
+                "Prophet": Prophet,
+                "XGBoost": xgb.XGBRegressor(),
+                "ARIMA": pm.auto_arima
+            }
+
+            model_report = {}
+
+            for model_name, model_obj in models.items():
+                logging.info(f'Initiating training for {model_name}')
+                model_params = self.model_trainer_config.params[model_name]
+
+                if model_name == "Prophet":
+                    trained_model, metrics = self._train_prophet(model_obj, model_params)
+                elif model_name == "XGBoost":
+                    trained_model, metrics = self._train_xgboost(model_obj, model_params)
+                elif model_name == "ARIMA":
+                    trained_model, metrics = self._train_arima(model_obj, model_params)
+                else:
+                    logging.warning(f"No specific training logic defined for {model_name}")
+                    continue
+                model_report[model_name] = {
+                    "model": trained_model, 
+                    "metrics": metrics
+                }
+            
+            best_model_name = max(model_report,
+                                  key = lambda k: model_report[k]["metrics"]["R2"])
+            best_model = model_report[best_model_name]["model"]
+            best_metrics = model_report[best_model_name]["metrics"]
+
+            logging.info(f"=== BEST MODEL FOUND: {best_model_name} ===")
+            logging.info(f"Metrics: {best_metrics}")
+
+            if best_metrics["R2"] < 0:
+                logging.warning("No model performed better than a " \
+                "baseline mean prediction (R2 < 0).")
+
+            logging.info('Saving the best model object.')
+
+            save_object(
+                file_path=self.model_trainer_config.trained_model_file_path,
+                obj = (best_model_name, best_model)
+            )
+            
+            return best_model_name, best_metrics
+
         except Exception as e:
             raise CustomException(e, sys)
