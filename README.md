@@ -11,18 +11,18 @@
 * **Modular Pipeline:** Separated components for Data Ingestion, Data Transformation, and Model Training.
 * **Automated Hyperparameter Tuning:** Built-in grid search and optimization for all supported models.
 * **Dynamic Time-Series Processing:** Automatically infers datetime frequencies and handles missing values via time-based interpolation.
-* **[Feature 4]:** [Brief description of another cool thing your project does]
+
 
 ## 🛠️ Tech Stack
 * **Language:** Python
 * **Data Processing:** Pandas, NumPy, Scikit-Learn
 * **Modeling:** XGBoost, Prophet, PMDArima
-* **[Other Tool]:** [e.g., Flask/FastAPI for deployment, MLflow for tracking]
+
 
 ---
 
 ## 💻 Installation and Setup
 
 ### Prerequisites
-* Python 3.8 or higher
+* Python 3.11 or higher
 * Git
