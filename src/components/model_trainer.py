@@ -3,7 +3,7 @@ import sys
 import pandas as pd
 import numpy as np
 import itertools
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.model_selection import GridSearchCV
 from prophet import Prophet
@@ -18,21 +18,18 @@ from src.utils.utils import save_object # Assuming you have this from earlier
 class ModelTrainerConfig:
     trained_model_file_path: str = os.path.join("artifacts", "model.pkl")
     target_col: str = 'Global_active_power'
-    params: dict = None
-
-    def __post__(self):
-        self.params = {
-            "XGBoost": {
-                'n_estimators': [50, 100, 200],
-                'max_depth': [3, 5, 7],
-                'learning_rate': [0.01, 0.1, 0.2]
-            },
-            "Prophet": {
-                'changepoint_prior_scale': [0.01, 0.1, 0.5],
-                'seasonality_prior_scale': [0.1, 1, 10]
-            },
-            "ARIMA": {}
-        }
+    params: dict = field(default_factory=lambda: {
+        "XGBoost": {
+            'n_estimators': [50, 100, 200],
+            'max_depth': [3, 5, 7],
+            'learning_rate': [0.01, 0.1, 0.2]
+        },
+        "Prophet": {
+            'changepoint_prior_scale': [0.01, 0.1, 0.5],
+            'seasonality_prior_scale': [0.1, 1, 10]
+        },
+        "ARIMA": {}
+    })
 
 class ModelTrainer:
     def __init__(self):
@@ -140,7 +137,7 @@ class ModelTrainer:
 
         model = model_func(y_train, start_p=0, start_q=0, 
                            max_p=5, max_q=5, m=1, 
-                           trace=False, error_action='ignore', 
+                           trace=True, error_action='ignore', 
                            suppress_warnings=True, 
                            stepwise=True)
         
@@ -168,7 +165,9 @@ class ModelTrainer:
 
             for model_name, model_obj in models.items():
                 logging.info(f'Initiating training for {model_name}')
+                # print(self.model_trainer_config.params)
                 model_params = self.model_trainer_config.params[model_name]
+                # print(model_params)
 
                 if model_name == "Prophet":
                     trained_model, metrics = self._train_prophet(model_obj, model_params)
@@ -207,3 +206,8 @@ class ModelTrainer:
 
         except Exception as e:
             raise CustomException(e, sys)
+        
+# if __name__ == "__main__":
+#     obj = ModelTrainer()
+#     obj.initiate_model_trainer(train_path='artifacts/train_transformed.csv',
+#                                     test_path='artifacts/test_transformed.csv')
