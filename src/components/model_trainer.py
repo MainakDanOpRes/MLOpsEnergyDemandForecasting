@@ -189,7 +189,7 @@ class ModelTrainer:
             best_model = model_report[best_model_name]["model"]
             best_metrics = model_report[best_model_name]["metrics"]
 
-            logging.info(f"=== BEST MODEL FOUND: {best_model_name} ===")
+            logging.info(f"BEST MODEL FOUND: {best_model_name}")
             logging.info(f"Metrics: {best_metrics}")
 
             if best_metrics["R2"] < 0:
