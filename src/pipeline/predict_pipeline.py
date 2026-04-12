@@ -26,11 +26,12 @@ class PredictPipeline:
             logging.info(f"Successfully loaded the {self.model_name} model.")
 
             logging.info("Preprocessing recent historical data.")
-            raw_data = pd.read_csv(recent_data_path, low_memory=False)
+            raw_data = pd.read_csv(recent_data_path, sep=',',na_values=['?'],low_memory=False)
             
+            logging.info("Applying the exact same transformations used during training.")
             # Apply the exact same transformations used during training
-            processed_data = preprocessor.fit_transform(raw_data)
-            
+            processed_data = preprocessor.transform(raw_data)
+            logging.info("Preprocessing completed.")
             # Infer frequency for generating future dates
             self.freq = pd.infer_freq(processed_data.index)
             if self.freq is None:
@@ -124,7 +125,7 @@ class PredictPipeline:
                 'month': current_date.month
             }
             
-            # B. Build the lag features dynamically from our history list
+            # Build the lag features dynamically from our history list
             # history[-1] is the most recent value (lag_1), history[-2] is lag_2, etc.
             for i in range(1, 25):
                 row_features[f'lag_{i}'] = history[-i]
@@ -132,11 +133,11 @@ class PredictPipeline:
             # Convert the dictionary to a single-row DataFrame
             X_step = pd.DataFrame([row_features])
             
-            # C. Predict the value for this single step
+            # Predict the value for this single step
             # model.predict returns an array, so we slice [0] to get the float
             step_prediction = float(self.model.predict(X_step)[0])
             
-            # D. The most important part: Append the prediction back into the history!
+            # The most important part: Append the prediction back into the history!
             # The next loop will now use this prediction as lag_1
             history.append(step_prediction)
             forecast_values.append(step_prediction)
@@ -150,7 +151,7 @@ class PredictPipeline:
 # if __name__ == "__main__":
 #     pipeline = PredictPipeline()
 #     forecast_df = pipeline.predict(
-#     recent_data_path='artifacts/train.csv', # Or a newly uploaded CSV of last week's power usage
+#     recent_data_path='artifacts/test.csv', # Or a newly uploaded CSV of last week's power usage
 #     steps_to_forecast=24
 # )
 

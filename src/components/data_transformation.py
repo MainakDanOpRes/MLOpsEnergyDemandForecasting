@@ -16,6 +16,7 @@ class DatetimeIndexer(BaseEstimator, TransformerMixin):
         self.time_col = time_col
 
     def fit(self, X, y=None):
+        self.is_fitted_ = True
         return self
 
     def transform(self, X):
@@ -34,6 +35,7 @@ class TimeSeriesImputer(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         # Imputers don't need to "learn" anything from the training data 
         # for interpolation, so we just return self.
+        self.is_fitted_ = True
         return self
     
     def transform(self, X):
@@ -52,6 +54,7 @@ class TimeSeriesResampler(BaseEstimator, TransformerMixin):
     def fit(self, X, y=None):
         # Imputers don't need to "learn" anything from the training data 
         # for interpolation, so we just return self.
+        self.is_fitted_ = True
         return self
     
     def transform(self, X):
@@ -110,7 +113,7 @@ class DataTransformation:
 
             logging.info("Applying preprocessing pipeline on training dataframe and testing dataframe")
             train_processed = preprocessing_obj.fit_transform(train_df)
-            test_processed = preprocessing_obj.fit_transform(test_df)
+            test_processed = preprocessing_obj.transform(test_df)
 
             train_processed.to_csv(self.data_transformation_config.transformed_train_file_path,
                                    index = True, header = True)
